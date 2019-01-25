@@ -54,11 +54,3 @@ void train_on_dataset(Layer *layers, double **x, double **y, int number_of_recor
 
 void print_layer_values(Layer *inputLayer);
 void print_network(Layer **inputLayers, int number_of_layers);
-
-typedef struct Network {
-	int number_of_layers;
-	Layer **layers;
-} Network;
-
-Network *create_network(int, ...);
-double *predict(Network *network, double, ...);

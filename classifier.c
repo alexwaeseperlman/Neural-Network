@@ -66,7 +66,8 @@ void XOR() {
 	print_layer_values(find_last_layer(layer1));
 }
 int main(int argc, char **argv) {
-	srand(RANDOMSEED); /*Layer *layer1 = create_layer(2, 1, sigmoid, sigmoid_prime);
+	srand(RANDOMSEED);
+	/*Layer *layer1 = create_layer(2, 1, sigmoid, sigmoid_prime);
 	Layer *layer2 = create_layer(1, 0, sigmoid, sigmoid_prime);
 	Layer *network[] = {layer1, layer2};
 

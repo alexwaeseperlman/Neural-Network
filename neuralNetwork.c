@@ -7,6 +7,7 @@
 
 #include "util.h"
 
+int empty_layer_initialized;
 Layer *EMPTY_LAYER;
 void initializeNN() {
 	EMPTY_LAYER = create_layer(0, linear, linear_prime);
@@ -14,6 +15,10 @@ void initializeNN() {
 
 // Create a layer
 Layer *create_layer(int neurons, double (*activation)(double), double (*activation_prime)(double)) {
+	if (!empty_layer_initialized) {
+		empty_layer_initialized = 1;
+		initializeNN();
+	}
 	Layer *out = malloc(sizeof(Layer));
 	if (!out) {
 		perror("malloc Layer");

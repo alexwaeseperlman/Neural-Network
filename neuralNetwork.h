@@ -18,6 +18,7 @@ void set_layer_values(Layer *layer, double values[]);
 
 // Forward propagate a list of layers to other layers
 void forward_propagate(Layer **layers, int number_of_layers);
+void reverse_activate(Layer **layers, int number_of_layers);
 void reset_values(Layer **layers, int number_of_layers);
 
 // Back propagate a layer

@@ -9,7 +9,7 @@
 #include "mnist.h"
 
 #define RANDOMSEED 839459
-#define ITERATIONS 10
+#define ITERATIONS 1
 #define learning_rate 0.1
 
 void print_mnist(double *mnist_data) {
@@ -92,11 +92,10 @@ int main(int argc, char **argv) {
 	print_layer_values(layer1);
 	print_layer_values(layer2);
 	printf("%f, %f\n", layer1->weights[0][0], layer1->weights[1][0]);*/
-	Layer *layer = create_layer(784, 16, sigmoid, sigmoid_prime);
+	Layer *layer = create_layer(784, 16, linear, linear_prime);
 	Layer *layer2 = create_layer(16, 16, sigmoid, sigmoid_prime);
 	Layer *layer3 = create_layer(16, 10, sigmoid, sigmoid_prime);
 	Layer *layer4 = create_layer(10, 0, sigmoid, sigmoid_prime);
-
 	int number_of_layers = 4;
 	Layer *layers[] = {layer, layer2, layer3, layer4};
 
@@ -159,6 +158,7 @@ int main(int argc, char **argv) {
 				set_layer_values(layer, testDatasetX[imageId]);
 				forward_propagate(layers, number_of_layers);
 				print_layer_values(layers[number_of_layers - 1]);
+				printf("Target:");
 				for (int i = 0; i < 10; i++) {
 					printf("%f, ", testDatasetY[imageId][i]);
 				}

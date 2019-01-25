@@ -1,2 +1,2 @@
 ./compile.sh
-./program
+./bin/program

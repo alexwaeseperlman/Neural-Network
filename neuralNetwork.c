@@ -91,6 +91,40 @@ void forward_propagate(Layer *layers[], int number_of_layers) {
 	}
 };
 
+void reverse_activate(Layer **layers, int number_of_layers) {
+	if (number_of_layers > 1) {
+		// Reset all layers but the last one (because it is reverse activation)
+		reset_values(layers, number_of_layers - 1);
+		// Don't run on zero because the first layer has nowhere to go
+		for (int i = number_of_layers - 1; i > 0; i--) {
+			// Make sure that the layers are able to be connected
+			if (layers[i]->neurons == layers[i - 1]->output_neurons) {
+				if (forward_prop_debug) {
+					print_layer_values(layers[i]);
+					printf("Layer %d: ", i);
+				}
+#pragma omp parallel for
+				for (int weight = 0; weight < layers[i - 1]->neurons; weight++) {
+					if (forward_prop_debug) printf("activation(%f", layers[i - 1]->values[weight]);
+					for (int neuron = 0; neuron < layers[i]->neurons; neuron++) {
+						if (forward_prop_debug) printf(" + %f * %f", layers[i]->weights[neuron][weight], layers[i]->values[neuron]);
+						layers[i - 1]->values[weight] += layers[i - 1]->weights[neuron][weight] * layers[i]->values[neuron];
+					}
+					if (forward_prop_debug) printf(" + %f", layers[i - 1]->bias[weight]);
+					layers[i - 1]->values[weight] += layers[i - 1]->bias[weight];
+					if (forward_prop_debug) printf(" = %f)", layers[i - 1]->values[weight]);
+					layers[i - 1]->values[weight] = layers[i - 1]->activation(layers[i - 1]->values[weight]);
+					if (forward_prop_debug) printf(" = %f\n", layers[i - 1]->values[weight]);
+				}
+			} else {
+				perror("Number of outputs is not equal to the number of neurons in the next layer");
+				exit(1);
+			}
+		}
+	} else {
+		printf("Only one layer inputted\n");
+	}
+}
 // Back propagate a layer
 double *back_propagate(Layer *inputLayer, Layer *outputLayer, double *delta, double learning_rate) {
 	if (verbose) printf("\n");

@@ -12,6 +12,20 @@
 #define ITERATIONS 10
 #define learning_rate 0.1
 
+void print_mnist(double *mnist_data) {
+	for (int x = 0; x < 28; x++) {
+		for (int y = 0; y < 28; y++) {
+			if (mnist_data[x * 28 + y] > 0.75)
+				printf("▓▓");
+			else if (mnist_data[x * 28 + y] > 0.35)
+				printf("▒▒");
+			else
+				printf("░░");
+		}
+		printf("\n");
+	}
+}
+
 void XOR() {
 	Layer *layer1 = create_layer(2, 3, sigmoid, sigmoid_prime);
 	Layer *layer2 = create_layer(3, 1, sigmoid, sigmoid_prime);
@@ -118,21 +132,40 @@ int main(int argc, char **argv) {
 
 		train_on_dataset(layers, number_of_layers, datasetX, datasetY, cnt, ITERATIONS, learning_rate);
 
-		print_network(layers, number_of_layers);
+		mnist_data *test_data;
 
-		while (1) {
-			int imageId;
-			printf("Enter the image you would like to test: ");
-			scanf("%d", &imageId);
-			set_layer_values(layer, datasetX[imageId]);
-			forward_propagate(layers, number_of_layers);
-			print_layer_values(layers[number_of_layers - 1]);
-			for (int i = 0; i < 10; i++) {
-				printf("%f, ", datasetY[imageId][i]);
+		if (ret = mnist_load("data/t10k-images-idx3-ubyte", "data/t10k-labels-idx1-ubyte", &test_data, &cnt)) {
+
+		} else {
+			double **testDatasetX = malloc(cnt * sizeof(double *));
+			for (int i = 0; i < cnt; i++) {
+				testDatasetX[i] = malloc(784 * sizeof(double));
+
+				for (int x = 0; x < 28; x++) {
+					for (int y = 0; y < 28; y++) {
+						testDatasetX[i][x * 28 + y] = data[i].data[x][y];
+					}
+				}
 			}
-			printf("\n\n\n");
+			double **testDatasetY = malloc(cnt * sizeof(double *));
+			for (int i = 0; i < cnt; i++) {
+				testDatasetY[i] = labels[data[i].label];
+			}
+			while (1) {
+				int imageId;
+				printf("Enter the image you would like to test: ");
+				scanf("%d", &imageId);
+				print_mnist(testDatasetX[imageId]);
+				set_layer_values(layer, testDatasetX[imageId]);
+				forward_propagate(layers, number_of_layers);
+				print_layer_values(layers[number_of_layers - 1]);
+				for (int i = 0; i < 10; i++) {
+					printf("%f, ", testDatasetY[imageId][i]);
+				}
+				printf("\n\n\n");
+			}
+			printf("\n");
+			free(data);
 		}
-		printf("\n");
-		free(data);
 	}
 }

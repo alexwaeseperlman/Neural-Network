@@ -1,3 +1,4 @@
 object
 bin
 .vscode
+.DS_Store

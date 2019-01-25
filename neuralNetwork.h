@@ -1,6 +1,6 @@
 #define verbose 0
-typedef struct Layer
-{
+#define forward_prop_debug 0
+typedef struct Layer {
 	int neurons;
 	double *values;
 	double *bias;
@@ -22,8 +22,18 @@ void reset_values(Layer **layers, int number_of_layers);
 
 // Back propagate a layer
 // Returns target values for a hidden layer
-double *
-back_propagate(Layer *inputLayer, Layer *outputLayer, double *error, double learningRate);
-void train_network(Layer **layers, int number_of_layers, double learningRate, double targetOutputs[]);
+double *back_propagate(Layer *inputLayer, Layer *outputLayer, double *error, double learningRate);
+void train_layers(Layer **layers, int number_of_layers, double learningRate, double targetOutputs[]);
+void train_on_dataset(Layer **layers, int number_of_layers, double **x, double **y, int number_of_records, int epochs,
+                      double learning_rate);
 
 void print_layer_values(Layer *inputLayer);
+void print_network(Layer **inputLayers, int number_of_layers);
+
+typedef struct Network {
+	int number_of_layers;
+	Layer **layers;
+} Network;
+
+Network *create_network(int, ...);
+double *predict(Network *network, double, ...);

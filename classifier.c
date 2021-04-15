@@ -9,8 +9,8 @@
 #include "mnist.h"
 
 #define RANDOMSEED 839459
-#define ITERATIONS 1
-#define learning_rate 0.1
+#define ITERATIONS 20
+#define learning_rate 0.01
 
 void print_mnist(double *mnist_data) {
 	for (int x = 0; x < 28; x++) {
@@ -27,9 +27,9 @@ void print_mnist(double *mnist_data) {
 }
 
 void XOR() {
-	Layer *layer1 = create_layer(2, sigmoid, sigmoid_prime);
-	Layer *layer2 = create_layer(3, sigmoid, sigmoid_prime);
-	Layer *layer3 = create_layer(1, sigmoid, sigmoid_prime);
+	Layer *layer1 = create_feedforward_layer(2, sigmoid, sigmoid_prime);
+	Layer *layer2 = create_feedforward_layer(3, sigmoid, sigmoid_prime);
+	Layer *layer3 = create_feedforward_layer(1, sigmoid, sigmoid_prime);
 
 	connect_all_layers((Layer *[]){layer1, layer2, layer3}, 3);
 
@@ -67,8 +67,8 @@ void XOR() {
 }
 int main(int argc, char **argv) {
 	srand(RANDOMSEED);
-	/*Layer *layer1 = create_layer(2, 1, sigmoid, sigmoid_prime);
-	Layer *layer2 = create_layer(1, 0, sigmoid, sigmoid_prime);
+	/*Layer *layer1 = create_feedforward_layer(2, 1, sigmoid, sigmoid_prime);
+	Layer *layer2 = create_feedforward_layer(1, 0, sigmoid, sigmoid_prime);
 	Layer *network[] = {layer1, layer2};
 
 	set_layer_values(layer1, (double[]){1, 1});
@@ -78,12 +78,26 @@ int main(int argc, char **argv) {
 	print_layer_values(layer1);
 	print_layer_values(layer2);
 	printf("%f, %f\n", layer1->weights[0][0], layer1->weights[1][0]);*/
-	Layer *layer1 = create_layer(784, linear, linear_prime);
-	Layer *layer2 = create_layer(32, sigmoid, sigmoid_prime);
-	Layer *layer3 = create_layer(32, sigmoid, sigmoid_prime);
-	Layer *output = create_layer(10, sigmoid, sigmoid_prime);
-	connect_all_layers((Layer *[]){layer1, layer2, layer3, output}, 4);
-
+	
+	Layer *input = create_reshape_layer(784, 1, 1, 1);
+	Layer *layer1 = create_reshape_layer(28, 28, 1, 3);
+	Layer *layer2 = create_convolution_layer(2, 2, 5, 5, 2, relu, relu_prime);
+	Layer *layer3 = create_convolution_layer(2, 2, 3, 3, 4, relu, relu_prime);
+	Layer *layer4 = create_feedforward_layer(196, relu, relu_prime);
+	Layer *output = create_feedforward_layer(10, sigmoid, sigmoid_prime);
+	connect_layers(input, layer1);
+	connect_layers(layer1, layer2);
+	connect_layers(layer2, layer3);
+	connect_layers(layer3, layer4);
+	connect_layers(layer4, output);/**/
+	
+	/*Layer *layer1 = create_feedforward_layer(784, sigmoid, sigmoid_prime);
+	Layer *layer2 = create_feedforward_layer(20, sigmoid, sigmoid_prime);
+	//Layer *layer3 = create_feedforward_layer(32, sigmoid, sigmoid_prime);
+	Layer *output = create_feedforward_layer(10, sigmoid, sigmoid_prime);
+	connect_layers(layer1, layer2);
+	connect_layers(layer2, output);//*/ /**/
+	summarizeNetwork(input);
 	mnist_data *data;
 	unsigned int cnt;
 	int ret;
@@ -114,12 +128,12 @@ int main(int argc, char **argv) {
 			datasetY[i] = labels[data[i].label];
 		}
 
-		train_on_dataset(layer1, datasetX, datasetY, cnt, ITERATIONS, learning_rate);
-
+		train_on_dataset(input, datasetX, datasetY, cnt, ITERATIONS, learning_rate);
+		printf("done training\n");
 		mnist_data *test_data;
 
 		if (ret = mnist_load("data/t10k-images-idx3-ubyte", "data/t10k-labels-idx1-ubyte", &test_data, &cnt)) {
-
+			printf("Unable to load test dataset\n");
 		} else {
 			double **testDatasetX = malloc(cnt * sizeof(double *));
 			for (int i = 0; i < cnt; i++) {
@@ -135,15 +149,14 @@ int main(int argc, char **argv) {
 			for (int i = 0; i < cnt; i++) {
 				testDatasetY[i] = labels[data[i].label];
 			}
+
 			while (1) {
 				int imageId;
-				char choice = ' ';
-				scanf("%c", &choice);
 				printf("Enter an image to convert to vector: ");
 				scanf("%d", &imageId);
 				print_mnist(testDatasetX[imageId]);
-				set_layer_values(layer1, testDatasetX[imageId]);
-				forward_propagate_layer(layer1);
+				set_layer_values(input, testDatasetX[imageId]);
+				forward_propagate_layer(input);
 				printf("Vector:\n");
 				print_layer_values(output);
 				printf("\n\n\n");
